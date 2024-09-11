@@ -1,1 +1,3 @@
-# Generalization-Bounds-for-DeepONet
+# Generalization Bounds for DeepONet
+
+# 0. Prerequisites
