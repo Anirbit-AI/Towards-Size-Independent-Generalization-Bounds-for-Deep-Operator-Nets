@@ -1,15 +1,9 @@
 import jax.numpy as jnp
-from jax.nn import relu
-from jax.nn import silu
-from jax import random
-from jax.example_libraries import optimizers
-from jax.flatten_util import ravel_pytree
+from jax.nn import relu, silu
 from jax import random, grad, vmap, jit
-
 import optax
-from tqdm import trange
 
-import itertools
+from tqdm import trange
 from functools import partial
 
 
@@ -45,20 +39,11 @@ class DeepONet:
         # Initialize
         branch_params = self.branch_init(rng_key = random.PRNGKey(1234))
         trunk_params = self.trunk_init(rng_key = random.PRNGKey(4321))
-        params = (branch_params, trunk_params)
+        self.params = (branch_params, trunk_params)
 
         # Use optimizers to set optimizer initialization and update functions
-        self.opt_init, \
-        self.opt_update, \
-        self.get_params = optimizers.adam(optimizers.exponential_decay(1e-3,
-                                                                      decay_steps=2000,
-                                                                      decay_rate=0.9))
-        self.opt_state = self.opt_init(params)
-
-        # Used to restore the trained model parameters
-        _, self.unravel_params = ravel_pytree(params)
-
-        self.itercount = itertools.count()
+        self.optimizer = optax.adam(optax.exponential_decay(1e-3, transition_steps=2000,decay_rate=0.9))
+        self.opt_state = self.optimizer.init(self.params)
 
         # Loss Setup
         self.loss_type = loss_type # huber or l2
@@ -113,32 +98,29 @@ class DeepONet:
 
     # Define a compiled update step
     @partial(jit, static_argnums=(0,))
-    def step(self, i, opt_state, don_batch):
-        params = self.get_params(opt_state)
+    def step(self, params, opt_state, don_batch):
         g = grad(self.loss_don)(params, don_batch)
-        return self.opt_update(i, g, opt_state)
+        updates, opt_state = self.optimizer.update(g, opt_state)
+        params = optax.apply_updates(params, updates)
+        return params, opt_state
 
     # Optimize parameters in a loop
     def train(self, don_dataset, test_dataset, nIter):
         # Define data iterators
-        don_data = iter(don_dataset)
         f_test, z_test, u_test = test_dataset
 
         pbar = trange(nIter)
         # Main training loop
         for it in pbar:
-            # Fetch data
-            don_batch = next(don_data)
-
-            self.opt_state = self.step(next(self.itercount), self.opt_state, don_batch)
-
+            # Process the batch
+            for don_batch in don_dataset:
+                self.params, self.opt_state = self.step(self.params, self.opt_state, don_batch)
+            
             if it % 100 == 0:
-                params = self.get_params(self.opt_state)
-
                 # Compute losses
-                loss_don_value = self.loss_don(params, don_batch)
-                loss_test_value = self.loss_test(params, f_test, z_test, u_test)
-                AFTL_value = self.AF_loss_test(params, f_test, z_test, u_test)
+                loss_don_value = self.loss_don(self.params, don_batch)
+                loss_test_value = self.loss_test(self.params, f_test, z_test, u_test)
+                AFTL_value = self.AF_loss_test(self.params, f_test, z_test, u_test)
 
                 # Store losses
                 self.loss_don_log.append(loss_don_value)
@@ -146,8 +128,7 @@ class DeepONet:
                 self.loss_AF_test_log.append(AFTL_value)
 
                 # Print losses
-                pbar.set_postfix({'Training Loss': loss_don_value,
-                                  'Test Loss': loss_test_value, 'AFTL': AFTL_value})
+                pbar.set_postfix({'Training Loss': loss_don_value,'Test Loss': loss_test_value, 'AFTL': AFTL_value})
 
     # Evaluates predictions at test points
     @partial(jit, static_argnums=(0,))

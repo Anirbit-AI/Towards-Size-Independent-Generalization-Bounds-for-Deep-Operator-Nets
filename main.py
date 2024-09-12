@@ -1,16 +1,6 @@
 import jax.numpy as jnp
 from jax import random, vmap
-
 from jax import config
-# from jax.numpy import index_exp as index
-# from jax.experimental.ode import odeint
-
-# from tqdm import trange
-# import matplotlib.pyplot as plt
-# from mpl_toolkits.mplot3d import Axes3D
-# import maths
-# from scipy.interpolate import griddata
-# from scipy.integrate import dblquad
 
 from scripts.data_generation import *
 from scripts.DeepONet import *
@@ -44,8 +34,6 @@ if __name__=="__main__":
     P_test = 3**6 # number of test collocation points
 
     'Data Generation'
-    # Train
-
     key = random.PRNGKey(11)
     keys = random.split(key, N_train) # N keys to create N Functions
 
@@ -85,39 +73,8 @@ if __name__=="__main__":
     # Train
     model.train(don_dataset, test_dataset, nIter=10)
 
-    save_checkpoint(model, 'model_checkpoint.npz')
+    # Save model params
+    save_checkpoint(model.params, './outputs/saved_models/model_checkpoint.npz')
 
-    # Visualizations
-    fig, axs = plt.subplots(1, 3, figsize=(24, 6))
-
-    # Colors from the 'viridis' colormap
-    medium_purple = '#5B278F'
-    light_purple = '#3b528b'
-    viri_green = '#00A896'
-
-    # Total loss per 100 iteration
-    total_loss_eval_numbers = range(1, len(model.loss_don_log) + 1)
-    axs[0].plot(total_loss_eval_numbers, model.loss_don_log, '--', color=medium_purple, label='Training loss')
-    axs[0].set_yscale('log')
-    axs[0].set_xlabel(r'Iterations (Scaled by $10^2$)', fontsize='large')
-    axs[0].set_ylabel('Training Loss', fontsize='large')
-    axs[0].set_title('Evolution of Training Loss Over Iterations', fontsize='large')
-
-
-    # Test loss
-    test_loss_eval_numbers = range(1, len(model.loss_test_log) + 1)
-    axs[1].plot(test_loss_eval_numbers, model.loss_test_log, '--', color=medium_purple, label='Test loss')
-    axs[1].set_yscale('log')
-    axs[1].set_xlabel(r'Iterations (Scaled by $10^2$)', fontsize='large')
-    axs[1].set_ylabel('Test Loss', fontsize='large')
-    axs[1].set_title('Evolution of Test Loss Over Iterations', fontsize='large')
-
-    # Average fractional test loss
-    AFTL_eval_numbers = range(1, len(model.loss_AF_test_log) + 1)
-    axs[2].plot(AFTL_eval_numbers, model.loss_AF_test_log, '--', color=medium_purple, label='Average Fractional Test loss')
-    axs[2].set_yscale('log')
-    axs[2].set_xlabel(r'Iterations (Scaled by $10^2$)', fontsize='large')
-    axs[2].set_ylabel('Average Fractional Test Loss', fontsize='large')
-    axs[2].set_title('Evolution of Average Fractional Test Loss over Iterations', fontsize='large')
-
-    plt.savefig("./outputs/train_test_error_plots.png", bbox_inches ="tight")
+    # Plot train and test errors
+    plot_train_test_error(model, "train_test_error_plots")

@@ -41,33 +41,6 @@ def generate_f(x, y, N, A, x0, y0, key):
 
     return jnp.outer(f1(x), f2(y)).reshape(-1,1)
 
-# 3D plot function
-def plot_3d(ax, X, Y, u):
-    surf = ax.plot_surface(X, Y, u, cmap='plasma')
-    ax.set_xlabel('$x$')
-    ax.set_ylabel('$y$')
-    ax.set_zlabel('$u(x,y,t)$')
-
-# Color plot function
-def plot(ax, X, Y, u):
-    pcm = ax.pcolor(X, Y, u, cmap='plasma')
-    plt.colorbar(pcm, ax=ax)
-    ax.set_xlabel('$x$')
-    ax.set_ylabel('$y$')
-
-# Error plot function
-def plot_us(x,u,y,s):
-  fig, ax1 = plt.subplots(figsize=(8, 6))
-  plt.rcParams['font.size'] = '18'
-  color='#440154'
-  wdt=1.5
-  ax1.plot(x,u,'k--',label='$u(x)=ds/dx$',linewidth=wdt)
-  ax1.plot(y,s,'-',label='$s(x)=s(0)+\int u(t)dt|_{t=y}$',linewidth=wdt)
-  ax1.set_xlabel('x')
-  ax1.set_ylabel('u')
-  ax1.tick_params(axis='y', color=color)
-  ax1.legend(loc = 'lower right', ncol=1)
-
 def f_testing(N, key, x0, y0, sine_amplitude):
     subkeys = random.split(key, 2)
     f1, c_m = generate_fourier_sine(N, sine_amplitude, x0, subkeys[0])
@@ -151,6 +124,41 @@ def generate_one_test_data(key, P_test, x0, y0, T_lim, m, sine_amplitude):
     f_sensor = f(x_sensor,y_sensor)
     f_test = jnp.tile(f_sensor.T, (P_test,1))
     u_test = u(A_mn(c_m, d_n), z_test[:,0],z_test[:,1],z_test[:,2],x0, y0)
+
+    return f_test, z_test, u_test
+
+# Geneate test data for plotting
+def generate_test_data_visualization(key, P_test, x0, y0, T_lim, m):
+
+    # Sample collocation points
+    x_test = jnp.linspace(0, x0, num=(int(P_test**0.5)))
+    y_test = jnp.linspace(0, y0, num=(int(P_test**0.5)))
+    t_test = jnp.linspace(0, T_lim, num=(int(P_test**0.5)))
+    x_test_mesh, y_test_mesh = jnp.meshgrid(x_test, y_test)
+    x_test = x_test_mesh.flatten().reshape(-1,1)
+    y_test = y_test_mesh.flatten().reshape(-1,1)
+
+    # Pre-allocate the array for efficiency
+    z_test = jnp.zeros((len(t_test),P_test, 3))  # Shape: (number of time steps, 3 columns)
+
+    # Testing collocation points
+    for i, t in enumerate(t_test):
+      # Create a single coordinate pair for each time step
+      coordinates = jnp.hstack([x_test, y_test, t * jnp.ones_like(x_test)])
+      z_test = z_test.at[i, :, :].set(coordinates)
+
+
+    # Input sensor locations and measurements
+    x_sensor = jnp.linspace(0, x0, int(m**0.5), endpoint = True)
+    y_sensor = jnp.linspace(0, y0, int(m**0.5), endpoint = True)
+
+    # Generate initial condition
+    f, c_m, d_n = f_testing(2, key)
+    f_test = jnp.tile(f(x_sensor,y_sensor).T, (P_test,1))
+
+    u_test = jnp.zeros((len(t_test),P_test))  # Shape: (number of time steps, 3 columns)
+    for i in range(len(t_test)):
+      u_test = u_test.at[i,:].set(u(A_mn(c_m, d_n), z_test[i,:,0],z_test[i,:,1],z_test[i,:,2]))
 
     return f_test, z_test, u_test
 
