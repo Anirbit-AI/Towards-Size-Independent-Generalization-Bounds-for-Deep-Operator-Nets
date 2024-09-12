@@ -128,7 +128,7 @@ def generate_one_test_data(key, P_test, x0, y0, T_lim, m, sine_amplitude):
     return f_test, z_test, u_test
 
 # Geneate test data for plotting
-def generate_test_data_visualization(key, P_test, x0, y0, T_lim, m):
+def generate_test_data_visualization(key, P_test, x0, y0, T_lim, m, sine_amplitude):
 
     # Sample collocation points
     x_test = jnp.linspace(0, x0, num=(int(P_test**0.5)))
@@ -153,12 +153,12 @@ def generate_test_data_visualization(key, P_test, x0, y0, T_lim, m):
     y_sensor = jnp.linspace(0, y0, int(m**0.5), endpoint = True)
 
     # Generate initial condition
-    f, c_m, d_n = f_testing(2, key)
+    f, c_m, d_n = f_testing(2, key, x0, y0, sine_amplitude)
     f_test = jnp.tile(f(x_sensor,y_sensor).T, (P_test,1))
 
     u_test = jnp.zeros((len(t_test),P_test))  # Shape: (number of time steps, 3 columns)
     for i in range(len(t_test)):
-      u_test = u_test.at[i,:].set(u(A_mn(c_m, d_n), z_test[i,:,0],z_test[i,:,1],z_test[i,:,2]))
+      u_test = u_test.at[i,:].set(u(A_mn(c_m, d_n), z_test[i,:,0],z_test[i,:,1],z_test[i,:,2],x0, y0))
 
     return f_test, z_test, u_test
 

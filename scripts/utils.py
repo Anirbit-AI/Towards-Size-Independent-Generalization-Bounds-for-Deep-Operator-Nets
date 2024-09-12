@@ -1,7 +1,12 @@
 import numpy as np
 from jax.flatten_util import ravel_pytree
 import matplotlib.pyplot as plt
+import configparser
 
+def load_config(file_path):
+    config = configparser.ConfigParser()
+    config.read(file_path)
+    return config
 
 def save_checkpoint(params, filename):
     # Flatten parameters
@@ -10,17 +15,16 @@ def save_checkpoint(params, filename):
     # Save the flattened parameters and the metadata
     np.savez(filename, params=flat_params, unravel_fn=unravel_fn)
 
-def load_checkpoint(filename):
-    # Load the checkpoint file
-    data = np.load(filename)
-    
-    # Extract flattened parameters and unravel function
-    flat_params = data['params']
+def load_checkpoint(filepath):
+    # Load the checkpoint 
+    data = np.load(filepath, allow_pickle=True)
+
+    # Unravel function 
     unravel_fn = data['unravel_fn'].item()  # Convert back to function
-   
-    # Unflatten parameters to the original structure
+    flat_params = data['params']
+
+    # Reconstruct the parameters
     params = unravel_fn(flat_params)
-    
     return params
 
 # 3D plot function
@@ -84,34 +88,34 @@ def plot_train_test_error(model, filename):
     axs[2].set_ylabel('Average Fractional Test Loss', fontsize='large')
     axs[2].set_title('Evolution of Average Fractional Test Loss over Iterations', fontsize='large')
 
-    plt.savefig(f"./outputs/{filename}.png", bbox_inches ="tight")
+    plt.savefig(f"./outputs/train_test/{filename}.png", bbox_inches ="tight")
 
     return
 
-def plot_actual_pred(XX, YY, U_test, U_pred, time_steps):
+def plot_actual_pred(XX, YY, U_test, U_pred, time_steps, ts, loss_type):
    # Create a new figure with two rows of subplots
     fig, axs = plt.subplots(2, 2, figsize=(12, 10))
 
     # Top row: 3D plots
     # Analytical Solution of the Heat Equation
     axs[0, 0] = fig.add_subplot(221, projection='3d')
-    plot_3d(axs[0, 0], XX, YY, U_test[0,:,:])
-    axs[0, 0].set_title(f"Analytical Solution of the Heat Equation at t = {time_steps[0]:.1f}", fontsize='large')
+    plot_3d(axs[0, 0], XX, YY, U_test[ts,:,:])
+    axs[0, 0].set_title(f"Analytical Solution of the Heat Equation at t = {time_steps[ts]:.1f}", fontsize='large')
 
     # Predicted Solution using DeepONet
     axs[0, 1] = fig.add_subplot(222, projection='3d')
-    plot_3d(axs[0, 1], XX, YY, U_pred[0,:,:])
-    axs[0, 1].set_title(f"Predicted Solution using DeepONet at t ={time_steps[0]:.1f}", fontsize='large')
+    plot_3d(axs[0, 1], XX, YY, U_pred[ts,:,:])
+    axs[0, 1].set_title(f"Predicted Solution using DeepONet at t ={time_steps[ts]:.1f}", fontsize='large')
 
     # Bottom row: 2D color plots
     # Analytical Solution of the Heat Equation
-    plot(axs[1, 0], XX, YY, U_test[0,:,:])
-    axs[1, 0].set_title(f"Analytical Solution of the Heat Equation at t = {time_steps[0]:.1f}", fontsize='large')
+    plot(axs[1, 0], XX, YY, U_test[ts,:,:])
+    axs[1, 0].set_title(f"Analytical Solution of the Heat Equation at t = {time_steps[ts]:.1f}", fontsize='large')
 
     # Predicted Solution using DeepONet
-    plot(axs[1, 1], XX, YY, U_pred[0,:,:])
-    axs[1, 1].set_title(f"Predicted Solution using DeepONet at t = {time_steps[0]:.1f}", fontsize='large')
+    plot(axs[1, 1], XX, YY, U_pred[ts,:,:])
+    axs[1, 1].set_title(f"Predicted Solution using DeepONet at t = {time_steps[ts]:.1f}", fontsize='large')
 
-    plt.savefig("./outputs/actual_predicted_plots.png", bbox_inches ="tight")
+    plt.savefig(f"./outputs/actual_predict/actual_predicted_plots_timestep_{ts}_loss_type_{loss_type}.png", bbox_inches ="tight")
 
     return

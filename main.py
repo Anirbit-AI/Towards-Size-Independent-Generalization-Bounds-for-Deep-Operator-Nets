@@ -8,30 +8,28 @@ from scripts.utils import *
 
 
 if __name__=="__main__":
+    config_file = load_config('config.ini')
+
     # Define hyperparameters and grid:
-    kappa = 1
-    T_lim = 1 # corresponds to T
+    loss_type = config_file["MODEL"]["loss_type"]
+    T_lim = int(config_file["GLOBAL"]["T_lim"]) # corresponds to T
 
     #Size of rectangle
-    x0 = 1
-    y0 = 1
-
+    x0 = int(config_file["GLOBAL"]["x0"])
+    y0 = int(config_file["GLOBAL"]["y0"])
 
     # Initial condition
-    num_fourier_terms = 2  # Number of sine terms in the Fourier series
-    sine_amplitude = 0.2  # Amplitude of the sine terms
+    num_fourier_terms = int(config_file["TRAIN"]["num_fourier_terms"])  # Number of sine terms in the Fourier series
+    sine_amplitude = float(config_file["TRAIN"]["sine_amplitude"])  # Amplitude of the sine terms
 
     # Training data
-    m = 100   # grid size in each dimention for discretizing the inhomogenuoes term, which mean that m is the branch net input dimention and it has to be a perfect square
-    N_train = 2**9  # number of inhomogenuoes term candidates ( i.e f)
-    P_train = 4**6 # number of evaluation points for each training loss
-
-
-    #----------------------------------TESTING-------------------------------
+    m = int(config_file["MODEL"]["branch_layers"].split(",")[0])   # grid size in each dimention for discretizing the inhomogenuoes term, which mean that m is the branch net input dimention and it has to be a perfect square
+    N_train = eval(config_file["TRAIN"]["N_train"])  # number of inhomogenuoes term candidates ( i.e f)
+    P_train = eval(config_file["TRAIN"]["P_train"]) # number of evaluation points for each training loss
 
     # Test data
-    N_test = 2**7 # number of test functions
-    P_test = 3**6 # number of test collocation points
+    N_test = eval(config_file["TEST"]["N_test"]) # number of test functions
+    P_test = eval(config_file["TEST"]["P_test"]) # number of test collocation points
 
     'Data Generation'
     key = random.PRNGKey(11)
@@ -61,9 +59,9 @@ if __name__=="__main__":
     config.update("jax_enable_x64", False)
 
     # Initialize model
-    branch_layers = [m, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128]
-    trunk_layers =  [3, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128]
-    model = DeepONet(branch_layers, trunk_layers, loss_type= "l2", huber_delta=0.5**9)
+    branch_layers = [ int(i.strip()) for i in config_file["MODEL"]["branch_layers"].split(",")]
+    trunk_layers =  [ int(i.strip()) for i in config_file["MODEL"]["trunk_layers"].split(",")]
+    model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=0.5**9)
 
     # Create dataset
     batch_size = 2**15
@@ -71,10 +69,10 @@ if __name__=="__main__":
     test_dataset = [f_test, z_test, u_test]
 
     # Train
-    model.train(don_dataset, test_dataset, nIter=10)
-
-    # Save model params
-    save_checkpoint(model.params, './outputs/saved_models/model_checkpoint.npz')
+    model.train(don_dataset, test_dataset, nIter=5000)
 
     # Plot train and test errors
-    plot_train_test_error(model, "train_test_error_plots")
+    plot_train_test_error(model, f"train_test_error_plots_{loss_type}")
+
+    # Save model params
+    save_checkpoint(model.params, f'./outputs/saved_models/model_checkpoint_{loss_type}.npz')
