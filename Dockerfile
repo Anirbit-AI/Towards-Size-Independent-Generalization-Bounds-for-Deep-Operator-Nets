@@ -4,6 +4,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /workspace
 
-RUN pip install matplotlib tqdm 
+RUN pip install matplotlib tqdm
 
-CMD ["bash"]
+# CMD ["bash"]
+CMD ["python", "/workspace/main.py"]

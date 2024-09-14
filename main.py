@@ -12,6 +12,7 @@ if __name__=="__main__":
 
     # Define hyperparameters and grid:
     loss_type = config_file["MODEL"]["loss_type"]
+    huber_delta = eval(config_file["MODEL"]["huber_delta"])
     T_lim = int(config_file["GLOBAL"]["T_lim"]) # corresponds to T
 
     #Size of rectangle
@@ -61,7 +62,7 @@ if __name__=="__main__":
     # Initialize model
     branch_layers = [ int(i.strip()) for i in config_file["MODEL"]["branch_layers"].split(",")]
     trunk_layers =  [ int(i.strip()) for i in config_file["MODEL"]["trunk_layers"].split(",")]
-    model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=0.5**9)
+    model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=huber_delta)
 
     # Create dataset
     batch_size = 2**15
