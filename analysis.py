@@ -2,6 +2,7 @@ import jax.numpy as jnp
 from jax import random 
 from jax import config
 from scipy.interpolate import griddata
+import os
 
 from scripts.DeepONet import *
 from scripts.utils import *
@@ -41,7 +42,6 @@ if __name__=="__main__":
 
     # Predict
     params = load_checkpoint(f"./outputs/saved_models/model_checkpoint_{loss_type}.npz")
-    # params = model.get_params(model.opt_state)
     u_pred = jnp.zeros((11,P_test))
 
     # Predict
@@ -63,3 +63,18 @@ if __name__=="__main__":
 
     for ts in range(11):
         plot_actual_pred(XX, YY, U_test, U_pred, time_steps,ts, loss_type)
+
+
+    if("model_checkpoint_huber.npz" in os.listdir("./outputs/saved_models") and "model_checkpoint_l2.npz" in os.listdir("./outputs/saved_models")):
+        try:
+            U_pred_huber = plot_predict(model, P_test, f_test_vis, z_test_vis, x0, y0, "huber")
+        except ValueError:
+            print("Checkpoints for huber loss does not exist")
+        
+        try:
+            U_pred_l2 = plot_predict(model, P_test, f_test_vis, z_test_vis, x0, y0, "l2")
+        except ValueError:
+            print("Checkpoints for l2 loss does not exist")
+
+        for ts in range(5):
+            plot_both_losses(XX, YY, U_test, U_pred_huber, U_pred_l2, time_steps, ts)

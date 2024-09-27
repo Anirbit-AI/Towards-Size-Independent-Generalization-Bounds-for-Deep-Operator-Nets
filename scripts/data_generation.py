@@ -1,7 +1,6 @@
 from jax import random, jit
 import jax.numpy as jnp
 
-import matplotlib.pyplot as plt
 from functools import partial
 
 

@@ -1,6 +1,8 @@
 import numpy as np
+import jax.numpy as jnp
 from jax.flatten_util import ravel_pytree
 import matplotlib.pyplot as plt
+from scipy.interpolate import griddata
 import configparser
 
 def load_config(file_path):
@@ -27,9 +29,30 @@ def load_checkpoint(filepath):
     params = unravel_fn(flat_params)
     return params
 
+def plot_predict(model, P_test, f_test_vis, z_test_vis, x0, y0, loss_type):
+    # Predict - both huber and l2
+    params = load_checkpoint(f"./outputs/saved_models/model_checkpoint_{loss_type}.npz")
+    u_pred = jnp.zeros((11,P_test))
+
+    # Predict
+    for i in range(11):
+        u_pred = u_pred.at[i,:].set(model.predict_u(params, f_test_vis, z_test_vis[i,:,:])[:,0])
+
+    # Generate an uniform mesh
+    x = jnp.linspace(0, x0, 121)
+    y = jnp.linspace(0, y0, 121)
+    XX, YY = jnp.meshgrid(x, y)
+
+    # Grid data
+    U_pred = jnp.zeros((11,121,121))
+    for i in range(11):
+        U_pred = U_pred.at[i].set(griddata(z_test_vis[i,:,:2], u_pred[i,:].flatten(), (XX,YY), method='cubic'))
+
+    return U_pred
+
 # 3D plot function
 def plot_3d(ax, X, Y, u):
-    surf = ax.plot_surface(X, Y, u, cmap='plasma')
+    ax.plot_surface(X, Y, u, cmap='plasma')
     ax.set_xlabel('$x$')
     ax.set_ylabel('$y$')
     ax.set_zlabel('$u(x,y,t)$')
@@ -100,22 +123,59 @@ def plot_actual_pred(XX, YY, U_test, U_pred, time_steps, ts, loss_type):
     # Analytical Solution of the Heat Equation
     axs[0, 0] = fig.add_subplot(221, projection='3d')
     plot_3d(axs[0, 0], XX, YY, U_test[ts,:,:])
-    axs[0, 0].set_title(f"Analytical Solution of the Heat Equation at t = {time_steps[ts]:.1f}", fontsize='large')
+    axs[0, 0].set_title(f"Analytical Solution - Heat Equation at t = {time_steps[ts]:.1f}", fontsize='large')
 
     # Predicted Solution using DeepONet
     axs[0, 1] = fig.add_subplot(222, projection='3d')
     plot_3d(axs[0, 1], XX, YY, U_pred[ts,:,:])
-    axs[0, 1].set_title(f"Predicted Solution using DeepONet at t ={time_steps[ts]:.1f}", fontsize='large')
+    axs[0, 1].set_title(f"Predicted Solution - DeepONet at t ={time_steps[ts]:.1f}", fontsize='large')
 
     # Bottom row: 2D color plots
     # Analytical Solution of the Heat Equation
     plot(axs[1, 0], XX, YY, U_test[ts,:,:])
-    axs[1, 0].set_title(f"Analytical Solution of the Heat Equation at t = {time_steps[ts]:.1f}", fontsize='large')
+    axs[1, 0].set_title(f"Analytical Solution - Heat Equation at t = {time_steps[ts]:.1f}", fontsize='large')
 
     # Predicted Solution using DeepONet
     plot(axs[1, 1], XX, YY, U_pred[ts,:,:])
-    axs[1, 1].set_title(f"Predicted Solution using DeepONet at t = {time_steps[ts]:.1f}", fontsize='large')
+    axs[1, 1].set_title(f"Predicted Solution - DeepONet at t = {time_steps[ts]:.1f}", fontsize='large')
 
     plt.savefig(f"./outputs/actual_predict/actual_predicted_plots_timestep_{ts}_loss_type_{loss_type}.png", bbox_inches ="tight")
+
+    return
+
+def plot_both_losses(XX, YY, U_test, U_pred_huber, U_pred_l2, time_steps, ts):
+   # Create a new figure with two rows of subplots
+    fig, axs = plt.subplots(2, 3, figsize=(20, 10))
+
+    # Top row: 3D plots
+    # Analytical Solution of the Heat Equation
+    axs[0, 0] = fig.add_subplot(231, projection='3d')
+    plot_3d(axs[0, 0], XX, YY, U_test[ts,:,:])
+    axs[0, 0].set_title(f"Analytical Solution - Heat Equation at t = {time_steps[ts]:.1f}", fontsize='large')
+
+    # Predicted Solution using DeepONet l2
+    axs[0, 1] = fig.add_subplot(232, projection='3d')
+    plot_3d(axs[0, 1], XX, YY, U_pred_l2[ts,:,:])
+    axs[0, 1].set_title(f"Predicted Solution - DeepONet and l2 at t ={time_steps[ts]:.1f}", fontsize='large')
+
+    # Predicted Solution using DeepONet huber
+    axs[0, 2] = fig.add_subplot(233, projection='3d')
+    plot_3d(axs[0, 2], XX, YY, U_pred_huber[ts,:,:])
+    axs[0, 2].set_title(f"Predicted Solution - DeepONet and Huber at t ={time_steps[ts]:.1f}", fontsize='large')
+
+    # Bottom row: 2D color plotss
+    # Analytical Solution of the Heat Equation
+    plot(axs[1, 0], XX, YY, U_test[ts,:,:])
+    axs[1, 0].set_title(f"Analytical Solution - Heat Equation at t = {time_steps[ts]:.1f}", fontsize='large')
+
+    # Predicted Solution using DeepONet l2
+    plot(axs[1, 1], XX, YY, U_pred_l2[ts,:,:])
+    axs[1, 1].set_title(f"Predicted Solution - DeepONet and l2 at t = {time_steps[ts]:.1f}", fontsize='large')
+
+    # Predicted Solution using DeepONet huber
+    plot(axs[1, 2], XX, YY, U_pred_huber[ts,:,:])
+    axs[1, 2].set_title(f"Predicted Solution - DeepONet and Huber at t = {time_steps[ts]:.1f}", fontsize='large')
+
+    plt.savefig(f"./outputs/actual_predict/actual_predicted_plots_timestep_{ts}_loss_type_both.png", bbox_inches ="tight")
 
     return
