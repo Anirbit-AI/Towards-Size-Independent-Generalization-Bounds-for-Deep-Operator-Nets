@@ -38,7 +38,7 @@ if __name__=="__main__":
 
     branch_layers = [ int(i.strip()) for i in config_file["MODEL"]["branch_layers"].split(",")]
     trunk_layers =  [ int(i.strip()) for i in config_file["MODEL"]["trunk_layers"].split(",")]
-    model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=huber_delta)
+    model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=huber_delta, activation=jnp.abs)
 
     # Predict
     params = load_checkpoint(f"./outputs/saved_models/model_checkpoint_{loss_type}.npz")

@@ -29,6 +29,44 @@ def load_checkpoint(filepath):
     params = unravel_fn(flat_params)
     return params
 
+def calculate_radbound(model, N_train, P_train):
+    # C value computation
+    branch_params, trunk_params = model.params
+    C_vals = []
+    n = len(branch_params)
+
+    # Weight matrices are transposed for this specific implementation (y = XW)
+    b_n1 = branch_params[n-2].T.shape[0]
+    t_n1 = trunk_params[n-2].T.shape[0]
+    p = branch_params[n-1].T.shape[0]
+
+    # Spectral Norm computation
+    branch_spec_norms = []
+    trunk_spec_norms = []
+
+    for i in range(n):
+        branch_spec_norms.append(np.linalg.norm(branch_params[i].T, ord=2).item())
+        trunk_spec_norms.append(np.linalg.norm(trunk_params[i].T, ord=2).item())
+
+
+    norm_matrix_n = np.abs(np.sum(np.array([np.outer((branch_params[n-1].T)[j], (trunk_params[n-1].T)[j]) for j in range(p)]), axis=0))
+    norm_vec_B = np.array([np.linalg.norm(np.array([(branch_params[n-2].T)[k1]])) for k1 in range(b_n1)])
+    norm_vec_T = np.array([np.linalg.norm(np.array([(trunk_params[n-2].T)[k2]])) for k2 in range(t_n1)])
+
+    C_1 = (norm_vec_B.T @ norm_matrix_n @ norm_vec_T).item()
+    C_vals.append(C_1)
+
+    for k in range(2, n):
+        b_k = branch_params[n-k-1].T.shape[0]
+        t_k = trunk_params[n-k-1].T.shape[0]
+        norm_matrix_k = np.array([[np.linalg.norm((branch_params[n-k-1].T)[j1])*np.linalg.norm((trunk_params[n-k-1].T)[j2]) for j2 in range(t_k)] for j1 in range(b_k)])
+        C_k = np.linalg.norm(norm_matrix_k, ord=2).item()
+        C_vals.append(C_k)
+
+    bound = (C_vals[0]*C_vals[1])/np.sqrt(N_train*P_train)
+
+    return bound
+
 def plot_predict(model, P_test, f_test_vis, z_test_vis, x0, y0, loss_type):
     # Predict - both huber and l2
     params = load_checkpoint(f"./outputs/saved_models/model_checkpoint_{loss_type}.npz")

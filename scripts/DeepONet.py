@@ -8,33 +8,35 @@ from functools import partial
 
 
 # Define the neural net
-def MLP(layers, activation=silu):
+def MLP(layers, activation):
   ''' Vanilla MLP'''
   def init(rng_key):
       def init_layer(key, d_in, d_out):
           k1, k2 = random.split(key)
           glorot_stddev = 1. / jnp.sqrt((d_in + d_out) / 2.)
           W = glorot_stddev * random.normal(k1, (d_in, d_out))
-          b = jnp.zeros(d_out)
-          return W, b
+        #   b = jnp.zeros(d_out)
+          return W#, b
       key, *keys = random.split(rng_key, len(layers))
       params = list(map(init_layer, keys, layers[:-1], layers[1:]))
       return params
   def apply(params, inputs):
-      for W, b in params[:-1]:
-          outputs = jnp.dot(inputs, W) + b
+    #   for W, b in params[:-1]:
+      for W in params[:-1]:
+          outputs = jnp.dot(inputs, W) #+ b
           inputs = activation(outputs)
-      W, b = params[-1]
-      outputs = jnp.dot(inputs, W) + b
+    #   W, b = params[-1]
+      W = params[-1]
+      outputs = jnp.dot(inputs, W) #+ b
       return outputs
   return init, apply
 
 # Define the model
 class DeepONet:
-    def __init__(self, branch_layers, trunk_layers, loss_type="l2", huber_delta=0.4):
+    def __init__(self, branch_layers, trunk_layers, loss_type="l2", huber_delta=0.4, activation=relu):
         # Network initialization and evaluation functions
-        self.branch_init, self.branch_apply = MLP(branch_layers, activation=relu)
-        self.trunk_init, self.trunk_apply = MLP(trunk_layers, activation=relu)
+        self.branch_init, self.branch_apply = MLP(branch_layers, activation=activation)
+        self.trunk_init, self.trunk_apply = MLP(trunk_layers, activation=activation)
 
         # Initialize
         branch_params = self.branch_init(rng_key = random.PRNGKey(1234))

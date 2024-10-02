@@ -62,7 +62,7 @@ if __name__=="__main__":
     # Initialize model
     branch_layers = [ int(i.strip()) for i in config_file["MODEL"]["branch_layers"].split(",")]
     trunk_layers =  [ int(i.strip()) for i in config_file["MODEL"]["trunk_layers"].split(",")]
-    model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=huber_delta)
+    model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=huber_delta, activation=jnp.abs)
 
     # Create dataset
     batch_size = 2**15
@@ -70,10 +70,15 @@ if __name__=="__main__":
     test_dataset = [f_test, z_test, u_test]
 
     # Train
-    model.train(don_dataset, test_dataset, nIter=5000)
+    model.train(don_dataset, test_dataset, nIter=1000)
 
     # Plot train and test errors
     plot_train_test_error(model, f"train_test_error_plots_{loss_type}")
+
+    # Calculate the Rademacher bound
+    bound_list = []
+    bound_list.append(calculate_radbound(model, N_train, P_train))
+    np.save('./outputs/gen_bound_{loss_type}.npy', bound_list)
 
     # Save model params
     save_checkpoint(model.params, f'./outputs/saved_models/model_checkpoint_{loss_type}.npz')
