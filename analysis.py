@@ -3,6 +3,7 @@ from jax import random
 from jax import config
 from scipy.interpolate import griddata
 import os
+import json
 
 from scripts.DeepONet import *
 from scripts.utils import *
@@ -64,6 +65,14 @@ if __name__=="__main__":
     for ts in range(11):
         plot_actual_pred(XX, YY, U_test, U_pred, time_steps,ts, loss_type)
 
+    with open(f'./outputs/gen_bound_{loss_type}.json', 'r') as json_file:
+        save_dict = json.load(json_file)
+
+    gen_error_list = np.array(save_dict['gen_error_list'])
+    bound_list = np.array(save_dict['bound_list'])
+    size_list = np.array(save_dict['size_list'])
+
+    plot_rademacher(gen_error_list, bound_list, size_list, loss_type)
 
     if("model_checkpoint_huber.npz" in os.listdir("./outputs/saved_models") and "model_checkpoint_l2.npz" in os.listdir("./outputs/saved_models")):
         try:

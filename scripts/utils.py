@@ -2,6 +2,8 @@ import numpy as np
 import jax.numpy as jnp
 from jax.flatten_util import ravel_pytree
 import matplotlib.pyplot as plt
+import seaborn as sb
+import matplotlib.ticker as ticker
 from scipy.interpolate import griddata
 import configparser
 
@@ -217,3 +219,44 @@ def plot_both_losses(XX, YY, U_test, U_pred_huber, U_pred_l2, time_steps, ts):
     plt.savefig(f"./outputs/actual_predict/actual_predicted_plots_timestep_{ts}_loss_type_both.png", bbox_inches ="tight")
 
     return
+
+def plot_rademacher(gen_error_list, bound_list, size_list, loss_type):
+    sb.set_theme(style='whitegrid', palette="deep", font_scale=1.1, rc={"text.color": "black", "axes.labelcolor": "black", "xtick.color": "black", "ytick.color": "black"})
+
+    with sb.color_palette('viridis_r', 7):
+        fig = plt.figure(figsize=(9, 6))
+
+    plt.xlabel('Generalization Error Bound')
+    plt.ylabel('|Train-Error - Test-Error|')
+
+    corr = np.corrcoef(np.array(bound_list), np.array(gen_error_list))[0][1]
+    g = sb.scatterplot(x=bound_list, y=gen_error_list, edgecolor='black', linewidth=1.2, s=35)#, label='$L_2$ loss (Correlation = {:.3f})'.format(corr))
+    for i, x in enumerate(size_list):
+        plt.annotate(str("%.1e" % x), (bound_list[i], gen_error_list[i]), xytext=(2, 2), textcoords='offset points')
+
+    plt.annotate('Correlation Coefficient = {:.3f}'.format(corr), xy=(0.03, 0.92), xycoords='axes fraction', color='black',bbox=dict(facecolor='white', edgecolor='grey', boxstyle='round,pad=0.5', alpha=0.6))
+
+    # Add a black boundary around the graph
+    plt.gca().spines['top'].set_edgecolor('black')
+    plt.gca().spines['top'].set_linewidth(1.2)
+    plt.gca().spines['right'].set_edgecolor('black')
+    plt.gca().spines['right'].set_linewidth(1.2)
+    plt.gca().spines['bottom'].set_edgecolor('black')
+    plt.gca().spines['bottom'].set_linewidth(1.2)
+    plt.gca().spines['left'].set_edgecolor('black')
+    plt.gca().spines['left'].set_linewidth(1.2)
+
+    plt.tick_params(axis='x', which='both', bottom=True, top=False, length=6, width=1.5)
+    plt.tick_params(axis='y', which='both', left=True, right=False, length=6, width=1.5)
+
+    # Format the ticks to scientific notation
+    ax = plt.gca()
+    ax.xaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=True))
+    ax.yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=True))
+
+    # Enable scientific notation for the x and y axes
+    ax.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+    ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+
+    plt.savefig(f"./outputs/plot_{loss_type}_boundcorr.svg")
+    plt.savefig(f"./outputs/plot_{loss_type}_boundcorr.png", bbox_inches ="tight")

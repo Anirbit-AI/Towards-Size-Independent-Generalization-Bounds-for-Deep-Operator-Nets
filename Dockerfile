@@ -4,7 +4,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /workspace
 
-RUN pip install matplotlib tqdm
+RUN pip install matplotlib tqdm seaborn
 
 # CMD ["bash"]
 CMD ["python", "/workspace/main.py"]
