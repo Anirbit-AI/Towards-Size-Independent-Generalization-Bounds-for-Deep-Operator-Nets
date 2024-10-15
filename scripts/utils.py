@@ -179,7 +179,7 @@ def plot_actual_pred(XX, YY, U_test, U_pred, time_steps, ts, loss_type):
     plot(axs[1, 1], XX, YY, U_pred[ts,:,:])
     axs[1, 1].set_title(f"Predicted Solution - DeepONet at t = {time_steps[ts]:.1f}", fontsize='large')
 
-    plt.savefig(f"./outputs/actual_predict/actual_predicted_plots_timestep_{ts}_loss_type_{loss_type}.png", bbox_inches ="tight")
+    plt.savefig(f"./outputs/actual_predict/actual_predicted_plots_heat_timestep_{ts}_loss_type_{loss_type}.png", bbox_inches ="tight")
 
     return
 
@@ -216,11 +216,11 @@ def plot_both_losses(XX, YY, U_test, U_pred_huber, U_pred_l2, time_steps, ts):
     plot(axs[1, 2], XX, YY, U_pred_huber[ts,:,:])
     axs[1, 2].set_title(f"Predicted Solution - DeepONet and Huber at t = {time_steps[ts]:.1f}", fontsize='large')
 
-    plt.savefig(f"./outputs/actual_predict/actual_predicted_plots_timestep_{ts}_loss_type_both.png", bbox_inches ="tight")
+    plt.savefig(f"./outputs/actual_predict/actual_predicted_plots_heat_timestep_{ts}_loss_type_both.png", bbox_inches ="tight")
 
     return
 
-def plot_rademacher(gen_error_list, bound_list, size_list, loss_type):
+def plot_rademacher(gen_error_list, bound_list, size_list, file_name):
     sb.set_theme(style='whitegrid', palette="deep", font_scale=1.1, rc={"text.color": "black", "axes.labelcolor": "black", "xtick.color": "black", "ytick.color": "black"})
 
     with sb.color_palette('viridis_r', 7):
@@ -258,5 +258,5 @@ def plot_rademacher(gen_error_list, bound_list, size_list, loss_type):
     ax.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
     ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
 
-    plt.savefig(f"./outputs/plot_{loss_type}_boundcorr.svg")
-    plt.savefig(f"./outputs/plot_{loss_type}_boundcorr.png", bbox_inches ="tight")
+    plt.savefig(f"./outputs/{file_name}.svg")
+    plt.savefig(f"./outputs/{file_name}.png", bbox_inches ="tight")

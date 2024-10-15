@@ -27,7 +27,7 @@ if __name__=="__main__":
     # Training data
     m = int(config_file["MODEL"]["branch_layers"].split(",")[0])   # grid size in each dimention for discretizing the inhomogenuoes term, which mean that m is the branch net input dimention and it has to be a perfect square
     N_train_list = [ eval(i.strip()) for i in config_file["TRAIN"]["N_train"].split(",")]  # number of inhomogenuoes term candidates ( i.e f)
-    P_train_list = [ eval(i.strip()) for i in config_file["TRAIN"]["P_train"].split(",")]  # number of inhomogenuoes term candidates ( i.e f)
+    P_train_list = [ eval(i.strip()) for i in config_file["TRAIN"]["P_train"].split(",")]  # number of collocation points
 
     # Test data
     N_test = eval(config_file["TEST"]["N_test"]) # number of test functions
@@ -79,10 +79,16 @@ if __name__=="__main__":
             model.train(don_dataset, test_dataset, nIter=4000)
 
             # Save model params
-            save_checkpoint(model.params, f'./outputs/saved_models/model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}.npz')
+            if(loss_type=="huber"):
+                save_checkpoint(model.params, f'./outputs/saved_models/model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}_{huber_delta}.npz')
+            else:
+                save_checkpoint(model.params, f'./outputs/saved_models/model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}.npz')
 
             # Plot train and test errors
-            plot_train_test_error(model, f"train_test_error_plots_N_train_{N_train}_P_train_{P_train}_{loss_type}")
+            if(loss_type=="huber"):
+                plot_train_test_error(model, f"train_test_error_plots_N_train_{N_train}_P_train_{P_train}_{loss_type}_{huber_delta}")
+            else:
+                plot_train_test_error(model, f"train_test_error_plots_N_train_{N_train}_P_train_{P_train}_{loss_type}")
 
             # Calculate the Rademacher bound
             bound_list.append(calculate_radbound(model, N_train, P_train))
@@ -93,6 +99,7 @@ if __name__=="__main__":
         
     size_list = np.array(N_train_list)*np.array(P_train_list)
 
-    save_dict = {"bound_list" : bound_list, "gen_error_list" : gen_error_list, "size_list" : size_list.tolist()}
-    with open(f'./outputs/gen_bound_{loss_type}.json', 'w') as json_file:
+    save_dict = {"bound_list" : bound_list, "gen_error_list" : gen_error_list, "size_list" : size_list.tolist(), "N_train" : N_train_list, "P_train" : P_train_list}
+    file_name = f"gen_bound_{loss_type}_{huber_delta}" if loss_type=="huber" else f"gen_bound_{loss_type}"
+    with open(f'./outputs/{file_name}.json', 'w') as json_file:
         json.dump(save_dict, json_file)

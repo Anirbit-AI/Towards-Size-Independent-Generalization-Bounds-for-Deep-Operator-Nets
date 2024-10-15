@@ -26,6 +26,8 @@ if __name__=="__main__":
 
     # Training data
     m = int(config_file["MODEL"]["branch_layers"].split(",")[0])   # grid size in each dimention for discretizing the inhomogenuoes term, which mean that m is the branch net input dimention and it has to be a perfect square
+    N_train_list = [ eval(i.strip()) for i in config_file["TRAIN"]["N_train"].split(",")]  # number of inhomogenuoes term candidates ( i.e f)
+    P_train_list = [ eval(i.strip()) for i in config_file["TRAIN"]["P_train"].split(",")]  # number of collocation points
 
     # Plotting data
     N_test = int(config_file["PLOT"]["N_test"]) # number of test functions
@@ -41,40 +43,45 @@ if __name__=="__main__":
     trunk_layers =  [ int(i.strip()) for i in config_file["MODEL"]["trunk_layers"].split(",")]
     model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=huber_delta, activation=jnp.abs)
 
-    # Predict
-    params = load_checkpoint(f"./outputs/saved_models/model_checkpoint_{loss_type}.npz")
-    u_pred = jnp.zeros((11,P_test))
+    for P_train in P_train_list:
+        for N_train in N_train_list:
+            # Predict
+            model_name = f"model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}_{huber_delta}" if loss_type=="huber" else f"model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}"
+            params = load_checkpoint(f"./outputs/saved_models/model_checkpoint_{loss_type}.npz")
+            u_pred = jnp.zeros((11,P_test))
 
-    # Predict
-    for i in range(11):
-        u_pred = u_pred.at[i,:].set(model.predict_u(params, f_test_vis, z_test_vis[i,:,:])[:,0])
+            # Predict
+            for i in range(11):
+                u_pred = u_pred.at[i,:].set(model.predict_u(params, f_test_vis, z_test_vis[i,:,:])[:,0])
 
-    # Generate an uniform mesh
-    x = jnp.linspace(0, x0, 121)
-    y = jnp.linspace(0, y0, 121)
-    XX, YY = jnp.meshgrid(x, y)
+            # Generate an uniform mesh
+            x = jnp.linspace(0, x0, 121)
+            y = jnp.linspace(0, y0, 121)
+            XX, YY = jnp.meshgrid(x, y)
 
-    time_steps = jnp.linspace(0, T_lim, num=(int(P_test**0.5)))
-    # Grid data
-    U_pred = jnp.zeros((11,121,121))
-    U_test = jnp.zeros((11,121,121))
-    for i in range(11):
-        U_pred = U_pred.at[i].set(griddata(z_test_vis[i,:,:2], u_pred[i,:].flatten(), (XX,YY), method='cubic'))
-        U_test = U_test.at[i].set(griddata(z_test_vis[i,:,:2], u_test_vis[i,:].flatten(), (XX,YY), method='cubic'))
+            time_steps = jnp.linspace(0, T_lim, num=(int(P_test**0.5)))
+            # Grid data
+            U_pred = jnp.zeros((11,121,121))
+            U_test = jnp.zeros((11,121,121))
+            for i in range(11):
+                U_pred = U_pred.at[i].set(griddata(z_test_vis[i,:,:2], u_pred[i,:].flatten(), (XX,YY), method='cubic'))
+                U_test = U_test.at[i].set(griddata(z_test_vis[i,:,:2], u_test_vis[i,:].flatten(), (XX,YY), method='cubic'))
 
-    for ts in range(11):
-        plot_actual_pred(XX, YY, U_test, U_pred, time_steps,ts, loss_type)
+            for ts in range(11):
+                plot_actual_pred(XX, YY, U_test, U_pred, time_steps,ts, loss_type)
 
-    with open(f'./outputs/gen_bound_{loss_type}.json', 'r') as json_file:
+    file_name = f"gen_bound_{loss_type}_{huber_delta}" if loss_type=="huber" else f"gen_bound_{loss_type}"
+    with open(f'./outputs/{file_name}.json', 'r') as json_file:
         save_dict = json.load(json_file)
 
     gen_error_list = np.array(save_dict['gen_error_list'])
     bound_list = np.array(save_dict['bound_list'])
     size_list = np.array(save_dict['size_list'])
 
-    plot_rademacher(gen_error_list, bound_list, size_list, loss_type)
+    file_name = f"plot_heat_{loss_type}_{huber_delta}_boundcorr" if loss_type=="huber" else f"plot_heat_{loss_type}"
+    plot_rademacher(gen_error_list, bound_list, size_list, file_name)
 
-    if("model_checkpoint_huber.npz" in os.listdir("./outputs/saved_models") and "model_checkpoint_l2.npz" in os.listdir("./outputs/saved_models")):
+    if(f"model_checkpoint_huber_{huber_delta}.npz" in os.listdir("./outputs/saved_models") or "model_checkpoint_l2.npz" in os.listdir("./outputs/saved_models")):
         try:
             U_pred_huber = plot_predict(model, P_test, f_test_vis, z_test_vis, x0, y0, "huber")
         except ValueError:
