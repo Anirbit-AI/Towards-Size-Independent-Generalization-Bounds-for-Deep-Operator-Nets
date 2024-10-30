@@ -16,8 +16,8 @@ If docker is already set up then you can follow these steps to set up your envir
 
 1. Pull the docker image : `docker pull nvcr.io/nvidia/jax:24.04-py3`
 2. Docker build :
-   - To run a docker container with `bash` shell, use line 9 instead of line 10 in the Dockerfile and execute : `docker build -t jax_don`
-   - To run a persistent docker container that runs just the main.py file and train the models, then use line 10 in the Dockerfile and execute : `docker build -t jax_don_persist`
+   - To run a docker container with `bash` shell, use *line 9* instead of *line 10* in the Dockerfile and execute : `docker build -t jax_don`
+   - To run a persistent docker container that runs just the main.py file and train the models, then use *line 10* in the Dockerfile and execute : `docker build -t jax_don_persist`
 3. Docker run : 
     - To run bash : `docker run --gpus all -it --rm -v $(pwd):/workspace jax_don`
     - To run persistent container : `docker run --gpus all -d --rm -v $(pwd):/workspace persist_jax_don`

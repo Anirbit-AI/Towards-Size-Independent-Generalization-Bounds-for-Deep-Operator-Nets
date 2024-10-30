@@ -47,7 +47,7 @@ if __name__=="__main__":
         for N_train in N_train_list:
             # Predict
             model_name = f"model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}_{huber_delta}" if loss_type=="huber" else f"model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}"
-            params = load_checkpoint(f"./outputs/saved_models/model_checkpoint_{loss_type}.npz")
+            params = load_checkpoint(f"./outputs/saved_models/{model_name}.npz")
             u_pred = jnp.zeros((11,P_test))
 
             # Predict
