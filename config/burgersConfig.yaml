@@ -1,0 +1,27 @@
+model:
+  branch_layers : [100, 128, 128, 128]
+  trunk_layers : [3, 128, 128, 128]
+  loss_type : 'huber'
+  # huber_delta : 0.5**2
+  huber_delta : 0.4
+
+global:
+  x0 : 1
+  y0 : 1
+  T_lim : 1
+  kappa : 1
+
+train:
+  # N_train : 2**4, 2**5, 2**6, 2**7, 2**8, 2**9
+  N_train : [2**6]
+  P_train : [2**6, 3**6, 4**6, 5**6, 6**6, 7**6]
+  num_fourier_terms : 2
+  sine_amplitude : 0.2
+
+test:
+  N_test : [2**6]
+  P_test : [3**6]
+
+plot:
+  P_test : 121
+  N_test : 1

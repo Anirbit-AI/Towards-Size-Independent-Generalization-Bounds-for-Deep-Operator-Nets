@@ -5,9 +5,9 @@ from scipy.interpolate import griddata
 import os
 import json
 
-from scripts.DeepONet import *
-from scripts.utils import *
-from scripts.data_generation import *
+from models.DeepONet import *
+from scripts.heatUtils import *
+from data.heatDataGeneration import *
 
 if __name__=="__main__":
     config_file = load_config('config.ini')

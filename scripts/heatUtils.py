@@ -6,6 +6,12 @@ import seaborn as sb
 import matplotlib.ticker as ticker
 from scipy.interpolate import griddata
 import configparser
+import yaml
+
+def load_yaml_config(file_path):
+    with open(file_path, 'r') as file:
+        config = yaml.safe_load(file)  # Use safe_load for security
+    return config
 
 def load_config(file_path):
     config = configparser.ConfigParser()
@@ -104,19 +110,19 @@ def plot(ax, X, Y, u):
     ax.set_xlabel('$x$')
     ax.set_ylabel('$y$')
 
-# Error plot function
-def plot_us(x,u,y,s):
-  fig, ax1 = plt.subplots(figsize=(8, 6))
-  plt.rcParams['font.size'] = '18'
-  color='#440154'
-  wdt=1.5
-  ax1.plot(x,u,'k--',label='$u(x)=ds/dx$',linewidth=wdt)
-  ax1.plot(y,s,'-',label='$s(x)=s(0)+\int u(t)dt|_{t=y}$',linewidth=wdt)
-  ax1.set_xlabel('x')
-  ax1.set_ylabel('u')
-  ax1.tick_params(axis='y', color=color)
-  ax1.legend(loc = 'lower right', ncol=1)
+# def plot_us(x,u,y,s):
+#   fig, ax1 = plt.subplots(figsize=(8, 6))
+#   plt.rcParams['font.size'] = '18'
+#   color='#440154'
+#   wdt=1.5
+#   ax1.plot(x,u,'k--',label='$u(x)=ds/dx$',linewidth=wdt)
+#   ax1.plot(y,s,'-',label='$s(x)=s(0)+\int u(t)dt|_{t=y}$',linewidth=wdt)
+#   ax1.set_xlabel('x')
+#   ax1.set_ylabel('u')
+#   ax1.tick_params(axis='y', color=color)
+#   ax1.legend(loc = 'lower right', ncol=1)
 
+# Error plot function
 def plot_train_test_error(model, filename):
     # Visualizations
     fig, axs = plt.subplots(1, 3, figsize=(24, 6))

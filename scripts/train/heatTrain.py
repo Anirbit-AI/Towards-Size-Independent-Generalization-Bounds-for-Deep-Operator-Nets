@@ -3,35 +3,35 @@ from jax import random, vmap
 from jax import config
 import json
 
-from scripts.data_generation import *
-from scripts.DeepONet import *
-from scripts.utils import *
+from data.heatDataGeneration import *
+from models.DeepONet import *
+from scripts.heatUtils import *
 
 
 if __name__=="__main__":
-    config_file = load_config('config.ini')
+    config_file = load_yaml_config('../../config/heatConfig.yaml')
 
     # Define hyperparameters and grid:
-    loss_type = config_file["MODEL"]["loss_type"]
-    huber_delta = eval(config_file["MODEL"]["huber_delta"])
-    T_lim = int(config_file["GLOBAL"]["T_lim"]) # corresponds to T
+    loss_type = config_file["model"]["loss_type"]
+    huber_delta = config_file["model"]["huber_delta"]
+    T_lim = int(config_file["global"]["T_lim"]) # corresponds to T
 
     # Size of rectangle
-    x0 = int(config_file["GLOBAL"]["x0"])
-    y0 = int(config_file["GLOBAL"]["y0"])
+    x0 = int(config_file["global"]["x0"])
+    y0 = int(config_file["global"]["y0"])
 
     # Initial condition
-    num_fourier_terms = int(config_file["TRAIN"]["num_fourier_terms"])  # Number of sine terms in the Fourier series
-    sine_amplitude = float(config_file["TRAIN"]["sine_amplitude"])  # Amplitude of the sine terms
+    num_fourier_terms = int(config_file["train"]["num_fourier_terms"])  # Number of sine terms in the Fourier series
+    sine_amplitude = float(config_file["train"]["sine_amplitude"])  # Amplitude of the sine terms
 
     # Training data
-    m = int(config_file["MODEL"]["branch_layers"].split(",")[0])   # grid size in each dimention for discretizing the inhomogenuoes term, which mean that m is the branch net input dimention and it has to be a perfect square
-    N_train_list = [ eval(i.strip()) for i in config_file["TRAIN"]["N_train"].split(",")]  # number of inhomogenuoes term candidates ( i.e f)
-    P_train_list = [ eval(i.strip()) for i in config_file["TRAIN"]["P_train"].split(",")]  # number of collocation points
+    m = config_file["model"]["branch_layers"][0]   # grid size in each dimention for discretizing the inhomogenuoes term, which mean that m is the branch net input dimention and it has to be a perfect square
+    N_train_list = config_file["train"]["N_train"]  # number of inhomogenuoes term candidates ( i.e f)
+    P_train_list = config_file["train"]["P_train"]  # number of collocation points
 
     # Test data
-    N_test = eval(config_file["TEST"]["N_test"]) # number of test functions
-    P_test = eval(config_file["TEST"]["P_test"]) # number of test collocation points
+    N_test = config_file["test"]["N_test"] # number of test functions
+    P_test = config_file["test"]["P_test"] # number of test collocation points
 
     bound_list = []
     gen_error_list = []
@@ -66,8 +66,8 @@ if __name__=="__main__":
             config.update("jax_enable_x64", False)
 
             # Initialize model
-            branch_layers = [ int(i.strip()) for i in config_file["MODEL"]["branch_layers"].split(",")]
-            trunk_layers =  [ int(i.strip()) for i in config_file["MODEL"]["trunk_layers"].split(",")]
+            branch_layers = config_file["model"]["branch_layers"]
+            trunk_layers =  config_file["model"]["trunk_layers"]
             model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=huber_delta, activation=jnp.abs)
 
             # Create dataset
