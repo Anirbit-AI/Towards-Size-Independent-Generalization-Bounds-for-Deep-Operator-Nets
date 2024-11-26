@@ -49,7 +49,7 @@ if __name__=="__main__":
         for N_train in N_train_list:
             # Predict
             model_name = f"model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}_{huber_delta}" if loss_type=="huber" else f"model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}"
-            params = load_checkpoint(f"./outputs/saved_models/{model_name}.npz")
+            params = load_checkpoint(f"./outputs/heat/saved_models/{model_name}.npz")
             u_pred = jnp.zeros((11,P_test))
 
             # Predict
@@ -73,7 +73,7 @@ if __name__=="__main__":
                 plot_actual_pred(XX, YY, U_test, U_pred, time_steps,ts, loss_type)
 
     file_name = f"gen_bound_{loss_type}_{huber_delta}" if loss_type=="huber" else f"gen_bound_{loss_type}"
-    with open(f'./outputs/{file_name}.json', 'r') as json_file:
+    with open(f'./outputs/heat/{file_name}.json', 'r') as json_file:
         save_dict = json.load(json_file)
 
     gen_error_list = np.array(save_dict['gen_error_list'])
@@ -83,7 +83,7 @@ if __name__=="__main__":
     file_name = f"plot_heat_{loss_type}_{huber_delta}_boundcorr" if loss_type=="huber" else f"plot_heat_{loss_type}"
     plot_rademacher(gen_error_list, bound_list, size_list, file_name)
 
-    if(f"model_N_train_{N_train_plot}_P_train_{P_train_plot}_checkpoint_huber_{huber_delta}.npz" in os.listdir("./outputs/saved_models") or f"model_N_train_{N_train_plot}_P_train_{P_train_plot}_checkpoint_l2.npz" in os.listdir("./outputs/saved_models")):
+    if(f"model_N_train_{N_train_plot}_P_train_{P_train_plot}_checkpoint_huber_{huber_delta}.npz" in os.listdir("./outputs/heat/saved_models") or f"model_N_train_{N_train_plot}_P_train_{P_train_plot}_checkpoint_l2.npz" in os.listdir("./outputs/heat/saved_models")):
         try:
             U_pred_huber = plot_predict(model, P_test, f_test_vis, z_test_vis, x0, y0, N_train, P_train, "huber", huber_delta)
         except ValueError:

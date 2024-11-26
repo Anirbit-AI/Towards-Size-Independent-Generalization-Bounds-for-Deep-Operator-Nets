@@ -82,9 +82,9 @@ def solve_burgers(key, num_sine_terms, sine_amplitude, Nx, Nt, T_lim, period, ka
     return (x, t, s), (u, u0)
 
 # Geneate training data corresponding to one input sample
-def generate_one_training_data(key, P, num_sine_terms, sine_amplitude, Nx , Nt, T_lim, period, kappa):
+def generate_one_training_data(key, P, num_sine_terms, sine_amplitude, Nx , Nt, T_lim, period, kappa, m):
     # Numerical solution
-    (x, t, s), (u, u0) = solve_burgers(key, num_sine_terms, sine_amplitude, Nx , Nt, T_lim, period, kappa)
+    (x, t, s), (u, u0) = solve_burgers(key, num_sine_terms, sine_amplitude, Nx, Nt, T_lim, period, kappa, m)
 
     # u is 1 x m
 
@@ -110,10 +110,10 @@ def generate_one_training_data(key, P, num_sine_terms, sine_amplitude, Nx , Nt, 
     return u_train, y_train_don, s_train_don
 
 # Geneate test data corresponding to one input sample
-def generate_one_test_data(key, P, num_sine_terms, sine_amplitude, T_lim, period, kappa):
+def generate_one_test_data(key, P, num_sine_terms, sine_amplitude, T_lim, period, kappa, m):
     Nx = P
     Nt = P
-    (x, t, s), (u, u0) = solve_burgers(key, num_sine_terms, sine_amplitude, Nx , Nt, T_lim, period, kappa)
+    (x, t, s), (u, u0) = solve_burgers(key, num_sine_terms, sine_amplitude, Nx, Nt, T_lim, period, kappa, m)
 
     XX, TT = jnp.meshgrid(x, t)
 

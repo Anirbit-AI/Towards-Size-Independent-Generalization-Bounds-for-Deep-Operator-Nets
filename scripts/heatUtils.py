@@ -78,9 +78,9 @@ def calculate_radbound(model, N_train, P_train):
 def plot_predict(model, P_test, f_test_vis, z_test_vis, x0, y0, N_train, P_train, loss_type, delta=0.25):
     # Predict - either huber or l2
     if(loss_type == "huber"):
-      params = load_checkpoint(f"./outputs/saved_models/model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}_{delta}.npz")
+      params = load_checkpoint(f"./outputs/heat/saved_models/model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}_{delta}.npz")
     else:
-      params = load_checkpoint(f"./outputs/saved_models/model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}.npz")
+      params = load_checkpoint(f"./outputs/heat/saved_models/model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}.npz")
     u_pred = jnp.zeros((11,P_test))
 
     # Predict
@@ -160,7 +160,7 @@ def plot_train_test_error(model, filename):
     axs[2].set_ylabel('Average Fractional Test Loss', fontsize='large')
     axs[2].set_title('Evolution of Average Fractional Test Loss over Iterations', fontsize='large')
 
-    plt.savefig(f"./outputs/train_test/{filename}.png", bbox_inches ="tight")
+    plt.savefig(f"./outputs/heat/train_test/{filename}.png", bbox_inches ="tight")
 
     return
 
@@ -188,7 +188,7 @@ def plot_actual_pred(XX, YY, U_test, U_pred, time_steps, ts, loss_type):
     plot(axs[1, 1], XX, YY, U_pred[ts,:,:])
     axs[1, 1].set_title(f"Predicted Solution - DeepONet at t = {time_steps[ts]:.1f}", fontsize='large')
 
-    plt.savefig(f"./outputs/actual_predict/actual_predicted_plots_heat_timestep_{ts}_loss_type_{loss_type}.png", bbox_inches ="tight")
+    plt.savefig(f"./outputs/heat/actual_predict/actual_predicted_plots_heat_timestep_{ts}_loss_type_{loss_type}.png", bbox_inches ="tight")
 
     return
 
@@ -225,7 +225,7 @@ def plot_both_losses(XX, YY, U_test, U_pred_huber, U_pred_l2, time_steps, ts):
     plot(axs[1, 2], XX, YY, U_pred_huber[ts,:,:])
     axs[1, 2].set_title(f"Predicted Solution - DeepONet and Huber at t = {time_steps[ts]:.1f}", fontsize='large')
 
-    plt.savefig(f"./outputs/actual_predict/actual_predicted_plots_heat_timestep_{ts}_loss_type_both.png", bbox_inches ="tight")
+    plt.savefig(f"./outputs/heat/actual_predict/actual_predicted_plots_heat_timestep_{ts}_loss_type_both.png", bbox_inches ="tight")
 
     return
 
@@ -267,5 +267,5 @@ def plot_rademacher(gen_error_list, bound_list, size_list, file_name):
     ax.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
     ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
 
-    plt.savefig(f"./outputs/{file_name}.svg")
-    plt.savefig(f"./outputs/{file_name}.png", bbox_inches ="tight")
+    plt.savefig(f"./outputs/heat/{file_name}.svg")
+    plt.savefig(f"./outputs/heat/{file_name}.png", bbox_inches ="tight")

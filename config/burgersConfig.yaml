@@ -6,21 +6,22 @@ model:
   huber_delta : 0.4
 
 global:
-  x0 : 1
-  y0 : 1
-  T_lim : 1
-  kappa : 1
+  Nx : 100
+  Nt : 100
+  kappa : 1.0 # tried = 1
+  period : 1 # rho
+  T_lim : 1 # T
 
 train:
-  # N_train : 2**4, 2**5, 2**6, 2**7, 2**8, 2**9
-  N_train : [2**6]
-  P_train : [2**6, 3**6, 4**6, 5**6, 6**6, 7**6]
-  num_fourier_terms : 2
+  N_train : [400]
+  # P_train : [500, 750, 1000, 1500, 2000, 2500, 3550, 4000] 
+  P_train : [200, 300, 400, 500, 750, 1000, 1500, 2000, 2500]
+  num_sine_terms : 3
   sine_amplitude : 0.2
 
 test:
-  N_test : [2**6]
-  P_test : [3**6]
+  N_test : 100
+  P_test : 20
 
 plot:
   P_test : 121
