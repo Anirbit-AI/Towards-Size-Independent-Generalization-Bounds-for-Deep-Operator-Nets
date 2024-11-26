@@ -10,28 +10,30 @@ from scripts.heatUtils import *
 from data.heatDataGeneration import *
 
 if __name__=="__main__":
-    config_file = load_config('config.ini')
+    config_file = load_yaml_config('./config/heatConfig.yaml')
 
     # Define hyperparameters and grid:
-    loss_type = config_file["MODEL"]["loss_type"]
-    huber_delta = eval(config_file["MODEL"]["huber_delta"])
-    T_lim = int(config_file["GLOBAL"]["T_lim"]) # corresponds to T
+    loss_type = config_file["model"]["loss_type"]
+    huber_delta = config_file["model"]["huber_delta"]
+    T_lim = int(config_file["global"]["T_lim"]) # corresponds to T
 
     # Size of rectangle
-    x0 = int(config_file["GLOBAL"]["x0"])
-    y0 = int(config_file["GLOBAL"]["y0"])
+    x0 = int(config_file["global"]["x0"])
+    y0 = int(config_file["global"]["y0"])
 
     # Intial condition
-    sine_amplitude = float(config_file["TRAIN"]["sine_amplitude"])  # Amplitude of the sine terms
+    sine_amplitude = float(config_file["train"]["sine_amplitude"])  # Amplitude of the sine terms
 
     # Training data
-    m = int(config_file["MODEL"]["branch_layers"].split(",")[0])   # grid size in each dimention for discretizing the inhomogenuoes term, which mean that m is the branch net input dimention and it has to be a perfect square
-    N_train_list = [ eval(i.strip()) for i in config_file["TRAIN"]["N_train"].split(",")]  # number of inhomogenuoes term candidates ( i.e f)
-    P_train_list = [ eval(i.strip()) for i in config_file["TRAIN"]["P_train"].split(",")]  # number of collocation points
+    m = config_file["model"]["branch_layers"][0]   # grid size in each dimention for discretizing the inhomogenuoes term, which mean that m is the branch net input dimention and it has to be a perfect square
+    N_train_list = [int(eval(i)) for i in config_file["train"]["N_train"]]  # number of inhomogenuoes term candidates ( i.e f)
+    P_train_list = [int(eval(i)) for i in  config_file["train"]["P_train"]]  # number of collocation points
 
     # Plotting data
-    N_test = int(config_file["PLOT"]["N_test"]) # number of test functions
-    P_test = int(config_file["PLOT"]["P_test"]) # number of test collocation points
+    N_test = int(eval(config_file["plot"]["N_test"])) # number of test functions
+    P_test = int(eval(config_file["plot"]["P_test"])) # number of test collocation points
+    N_train_plot = int(eval(config_file["plot"]["N_train"])) # number of test functions
+    P_train_plot = int(eval(config_file["plot"]["P_train"])) # number of test collocation points
 
     key = random.PRNGKey(1122) # a new unseen key
     keys = random.split(key, N_test)
@@ -39,9 +41,9 @@ if __name__=="__main__":
     config.update("jax_enable_x64", True)
     f_test_vis, z_test_vis, u_test_vis = generate_test_data_visualization(key, P_test, x0, y0, T_lim, m, sine_amplitude)
 
-    branch_layers = [ int(i.strip()) for i in config_file["MODEL"]["branch_layers"].split(",")]
-    trunk_layers =  [ int(i.strip()) for i in config_file["MODEL"]["trunk_layers"].split(",")]
-    model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=huber_delta, activation=jnp.abs)
+    branch_layers = config_file["model"]["branch_layers"]
+    trunk_layers =  config_file["model"]["trunk_layers"]
+    model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=huber_delta)
 
     for P_train in P_train_list:
         for N_train in N_train_list:
@@ -81,14 +83,14 @@ if __name__=="__main__":
     file_name = f"plot_heat_{loss_type}_{huber_delta}_boundcorr" if loss_type=="huber" else f"plot_heat_{loss_type}"
     plot_rademacher(gen_error_list, bound_list, size_list, file_name)
 
-    if(f"model_checkpoint_huber_{huber_delta}.npz" in os.listdir("./outputs/saved_models") or "model_checkpoint_l2.npz" in os.listdir("./outputs/saved_models")):
+    if(f"model_N_train_{N_train_plot}_P_train_{P_train_plot}_checkpoint_huber_{huber_delta}.npz" in os.listdir("./outputs/saved_models") or f"model_N_train_{N_train_plot}_P_train_{P_train_plot}_checkpoint_l2.npz" in os.listdir("./outputs/saved_models")):
         try:
-            U_pred_huber = plot_predict(model, P_test, f_test_vis, z_test_vis, x0, y0, "huber")
+            U_pred_huber = plot_predict(model, P_test, f_test_vis, z_test_vis, x0, y0, N_train, P_train, "huber", huber_delta)
         except ValueError:
             print("Checkpoints for huber loss does not exist")
         
         try:
-            U_pred_l2 = plot_predict(model, P_test, f_test_vis, z_test_vis, x0, y0, "l2")
+            U_pred_l2 = plot_predict(model, P_test, f_test_vis, z_test_vis, x0, y0, N_train, P_train, "l2")
         except ValueError:
             print("Checkpoints for l2 loss does not exist")
 

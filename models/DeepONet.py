@@ -15,19 +15,22 @@ def MLP(layers, activation):
           k1, k2 = random.split(key)
           glorot_stddev = 1. / jnp.sqrt((d_in + d_out) / 2.)
           W = glorot_stddev * random.normal(k1, (d_in, d_out))
-        #   b = jnp.zeros(d_out)
-          return W#, b
+          b = jnp.zeros(d_out) # include to have bias
+          return W, b # include to have bias
+        #   return W
       key, *keys = random.split(rng_key, len(layers))
       params = list(map(init_layer, keys, layers[:-1], layers[1:]))
       return params
   def apply(params, inputs):
-    #   for W, b in params[:-1]:
-      for W in params[:-1]:
-          outputs = jnp.dot(inputs, W) #+ b
+      for W, b in params[:-1]: # include to have bias
+    #   for W in params[:-1]:
+        #   outputs = jnp.dot(inputs, W)
+          outputs = jnp.dot(inputs, W) + b # include to have bias
           inputs = activation(outputs)
-    #   W, b = params[-1]
-      W = params[-1]
-      outputs = jnp.dot(inputs, W) #+ b
+      W, b = params[-1] # include to have bias
+    #   W = params[-1]
+    #   outputs = jnp.dot(inputs, W)
+      outputs = jnp.dot(inputs, W) + b # include to have bias
       return outputs
   return init, apply
 

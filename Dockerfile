@@ -7,4 +7,4 @@ WORKDIR /workspace
 RUN pip install matplotlib tqdm seaborn
 
 # CMD ["bash"]
-CMD ["python", "/workspace/main.py"]
+CMD ["python", "/workspace/scripts/train/heatTrain.py"]

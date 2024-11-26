@@ -2,14 +2,17 @@ import jax.numpy as jnp
 from jax import random, vmap
 from jax import config
 import json
+import sys
 
-from data.heatDataGeneration import *
+sys.path.append("./")
+
+from scripts.data.heatDataGeneration import *
 from models.DeepONet import *
 from scripts.heatUtils import *
 
 
 if __name__=="__main__":
-    config_file = load_yaml_config('../../config/heatConfig.yaml')
+    config_file = load_yaml_config('./config/heatConfig.yaml')
 
     # Define hyperparameters and grid:
     loss_type = config_file["model"]["loss_type"]
@@ -26,12 +29,12 @@ if __name__=="__main__":
 
     # Training data
     m = config_file["model"]["branch_layers"][0]   # grid size in each dimention for discretizing the inhomogenuoes term, which mean that m is the branch net input dimention and it has to be a perfect square
-    N_train_list = config_file["train"]["N_train"]  # number of inhomogenuoes term candidates ( i.e f)
-    P_train_list = config_file["train"]["P_train"]  # number of collocation points
+    N_train_list = [int(eval(i)) for i in config_file["train"]["N_train"]]  # number of inhomogenuoes term candidates ( i.e f)
+    P_train_list = [int(eval(i)) for i in  config_file["train"]["P_train"]]  # number of collocation points
 
     # Test data
-    N_test = config_file["test"]["N_test"] # number of test functions
-    P_test = config_file["test"]["P_test"] # number of test collocation points
+    N_test = int(eval(config_file["test"]["N_test"])) # number of test functions
+    P_test = int(eval(config_file["test"]["P_test"])) # number of test collocation points
 
     bound_list = []
     gen_error_list = []
@@ -68,7 +71,7 @@ if __name__=="__main__":
             # Initialize model
             branch_layers = config_file["model"]["branch_layers"]
             trunk_layers =  config_file["model"]["trunk_layers"]
-            model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=huber_delta, activation=jnp.abs)
+            model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=huber_delta)
 
             # Create dataset
             batch_size = 2**15 if 2**15 < P_train else P_train
@@ -76,7 +79,7 @@ if __name__=="__main__":
             test_dataset = [f_test, z_test, u_test]
 
             # Train
-            model.train(don_dataset, test_dataset, nIter=4000)
+            model.train(don_dataset, test_dataset, nIter=10000)
 
             # Save model params
             if(loss_type=="huber"):

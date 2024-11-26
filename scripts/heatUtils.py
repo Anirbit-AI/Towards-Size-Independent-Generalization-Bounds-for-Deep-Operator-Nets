@@ -13,10 +13,10 @@ def load_yaml_config(file_path):
         config = yaml.safe_load(file)  # Use safe_load for security
     return config
 
-def load_config(file_path):
-    config = configparser.ConfigParser()
-    config.read(file_path)
-    return config
+# def load_config(file_path):
+#     config = configparser.ConfigParser()
+#     config.read(file_path)
+#     return config
 
 def save_checkpoint(params, filename):
     # Flatten parameters
@@ -75,9 +75,12 @@ def calculate_radbound(model, N_train, P_train):
 
     return bound
 
-def plot_predict(model, P_test, f_test_vis, z_test_vis, x0, y0, loss_type):
-    # Predict - both huber and l2
-    params = load_checkpoint(f"./outputs/saved_models/model_checkpoint_{loss_type}.npz")
+def plot_predict(model, P_test, f_test_vis, z_test_vis, x0, y0, N_train, P_train, loss_type, delta=0.25):
+    # Predict - either huber or l2
+    if(loss_type == "huber"):
+      params = load_checkpoint(f"./outputs/saved_models/model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}_{delta}.npz")
+    else:
+      params = load_checkpoint(f"./outputs/saved_models/model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}.npz")
     u_pred = jnp.zeros((11,P_test))
 
     # Predict
