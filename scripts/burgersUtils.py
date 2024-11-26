@@ -6,6 +6,7 @@ import seaborn as sb
 import matplotlib.ticker as ticker
 from scipy.interpolate import griddata
 import configparser
+import yaml
 
 
 def load_yaml_config(file_path):
@@ -102,7 +103,8 @@ def plot_us(x,u,y,s):
     ax1.tick_params(axis='y', color=color)
     ax1.legend(loc = 'lower right', ncol=1)
 
-def plot_tr_dynamics(model, P_train):
+# Error plot function
+def plot_train_test_error(model, filename):
     # Visualizations
     fig, axs = plt.subplots(1, 3, figsize=(24, 6))
 
@@ -118,6 +120,7 @@ def plot_tr_dynamics(model, P_train):
     axs[0].set_xlabel(r'Iterations (Scaled by $10^2$)', fontsize='large')
     axs[0].set_ylabel('Training Loss', fontsize='large')
     axs[0].set_title('Evolution of Training Loss Over Iterations', fontsize='large')
+
 
     # Test loss
     test_loss_eval_numbers = range(1, len(model.loss_test_log) + 1)
@@ -135,7 +138,6 @@ def plot_tr_dynamics(model, P_train):
     axs[2].set_ylabel('Average Fractional Test Loss', fontsize='large')
     axs[2].set_title('Evolution of Average Fractional Test Loss over Iterations', fontsize='large')
 
-    plt.tight_layout()
-    plt.savefig(f"plot_tr_dynamics_ptrain{P_train}_losstype{model.loss_type}.png")
+    plt.savefig(f"./outputs/heat/train_test/{filename}.png", bbox_inches ="tight")
 
     return
