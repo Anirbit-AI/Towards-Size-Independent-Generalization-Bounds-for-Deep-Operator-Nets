@@ -103,5 +103,5 @@ if __name__=="__main__":
 
     save_dict = {"bound_list" : bound_list, "gen_error_list" : gen_error_list, "size_list" : size_list.tolist(), "N_train" : N_train_list, "P_train" : P_train_list}
     file_name = f"gen_bound_{loss_type}_{huber_delta}" if loss_type=="huber" else f"gen_bound_{loss_type}"
-    with open(f'./outputs/{file_name}.json', 'w') as json_file:
+    with open(f'./outputs/burgers/{file_name}.json', 'w') as json_file:
         json.dump(save_dict, json_file)

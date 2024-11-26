@@ -16,7 +16,7 @@ if __name__=="__main__":
 
     # Define hyperparameters and grid:
     loss_type = config_file["model"]["loss_type"]
-    huber_delta = config_file["model"]["huber_delta"]
+    huber_delta = eval(config_file["model"]["huber_delta"])
     T_lim = int(config_file["global"]["T_lim"]) # corresponds to T
 
     # Size of rectangle
@@ -79,7 +79,7 @@ if __name__=="__main__":
             test_dataset = [f_test, z_test, u_test]
 
             # Train
-            model.train(don_dataset, test_dataset, nIter=10000)
+            model.train(don_dataset, test_dataset, nIter=config_file["train"]["epochs"])
 
             # Save model params
             if(loss_type=="huber"):

@@ -27,8 +27,8 @@ Note : Please refer to docker documentation linked above for more information ab
 
 ## 1. Training
 
-The `main.py` contains the scripts for training the models
+The `scripts\train\<pde-name>Train.py` contains the scripts for training the models
 
 ## 2. Analysis
 
-The `analysis.py` contains the scripts for analyzing the models
+The `scripts\analysis\<pde-name>Analysis.py` contains the scripts for analyzing the models
