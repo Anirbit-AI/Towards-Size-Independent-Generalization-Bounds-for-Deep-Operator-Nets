@@ -4,7 +4,7 @@ This repository contains the official code for the paper : [Towards Size-Indepen
 
 ## 0. Prerequisites
 
-The `config.ini` file can be used for setting the branch_layers, trunk_layers, loss_type, huber_delta, x0, y0 T_lim, kappa, N_train,P_train, num_fourier_terms, N_test and P_test.
+The `config/<pde-name>Config.yaml` file can be used for setting the branch_layers, trunk_layers, loss_type, huber_delta, x0, y0 T_lim, kappa, N_train,P_train, num_fourier_terms, N_test and P_test.
 
 
 ### 0.1. Local 
