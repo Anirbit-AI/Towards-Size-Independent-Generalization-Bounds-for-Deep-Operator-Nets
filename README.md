@@ -1,6 +1,6 @@
-# Generalization Bounds for DeepONet
+# Towards Size-Independent Generalization Bounds for Deep Operator Nets
 
-This repository contains the official code for the paper : [Towards Size-Independent Generalization Bounds for Deep Operator Nets](https://arxiv.org/abs/2205.11359).
+This repository contains the official code for the paper : [Towards Size-Independent Generalization Bounds for Deep Operator Nets (TMLR, 2024)](https://arxiv.org/abs/2205.11359).
 
 ## 0. Prerequisites
 
