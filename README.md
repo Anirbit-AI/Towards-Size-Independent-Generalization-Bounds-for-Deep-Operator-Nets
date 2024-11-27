@@ -29,6 +29,8 @@ Note : Please refer to docker documentation linked above for more information ab
 
 The `scripts\train\<pde-name>Train.py` contains the scripts for training the models
 
+Note : The bias in the DeepONet needs to be disabled before calculating the Rademacher bound
+
 ## 2. Analysis
 
 The `scripts\analysis\<pde-name>Analysis.py` contains the scripts for analyzing the models

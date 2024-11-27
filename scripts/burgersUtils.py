@@ -182,3 +182,37 @@ def plot_rademacher(gen_error_list, bound_list, size_list, file_name):
 
     plt.savefig(f"./outputs/heat/{file_name}.svg")
     plt.savefig(f"./outputs/heat/{file_name}.png", bbox_inches ="tight")
+
+def plot_actual_pred(XX, TT, S_test, S_pred):
+    # Create a new figure with two rows of subplots
+    fig, axs = plt.subplots(2, 2, figsize=(14, 11))
+
+    # Top row: 3D plots
+    # Numerical Solution of Burgers' Equation
+    # axs[0, 0].remove()  # Remove the existing 2D subplot
+    axs[0, 0].tick_params(labelbottom=False, labelleft=False)
+    axs[0, 0] = fig.add_subplot(221, projection='3d')
+    plot_3d(axs[0, 0], XX, TT, S_test)
+    axs[0, 0].set_title("Numerical Solution of Burgers' Equation", fontsize=16)
+    axs[0, 0].tick_params(axis='both', which='major', labelsize=12)
+
+    # Predicted Solution using DeepONet
+    # axs[0, 1].remove()  # Remove the existing 2D subplot
+    axs[0, 1].tick_params(labelbottom=False, labelleft=False)
+    axs[0, 1] = fig.add_subplot(222, projection='3d')
+    plot_3d(axs[0, 1], XX, TT, S_pred)
+    axs[0, 1].set_title("Predicted Solution using DeepONet", fontsize=16)
+    axs[0, 1].tick_params(axis='both', which='major', labelsize=12)
+
+    # Bottom row: 2D color plots
+    # Numerical Solution of Burgers' Equation
+    plot(axs[1, 0], XX, TT, S_test)
+    axs[1, 0].set_title("Numerical Solution of Burgers' Equation", fontsize=16)
+    axs[1, 0].tick_params(axis='both', which='major', labelsize=12)
+
+    # Predicted Solution using DeepONet
+    plot(axs[1, 1], XX, TT, S_pred)
+    axs[1, 1].set_title("Predicted Solution using DeepONet", fontsize=16)
+    axs[1, 1].tick_params(axis='both', which='major', labelsize=12)
+
+    plt.savefig(f"./outputs/heat/plot_actual_pred.png", bbox_inches ="tight")
