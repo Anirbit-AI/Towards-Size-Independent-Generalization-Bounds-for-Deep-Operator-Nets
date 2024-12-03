@@ -2,6 +2,18 @@
 
 This repository contains the official code for the paper : [Towards Size-Independent Generalization Bounds for Deep Operator Nets (TMLR, 2024)](https://openreview.net/forum?id=21kO0u6LN0&noteId=R8EOCZXPfz).
 
+```
+@article{
+gopalani2024towards,
+title={Towards Size-Independent Generalization Bounds for Deep Operator Nets},
+author={Pulkit Gopalani and Sayar Karmakar and Dibyakanti Kumar and Anirbit Mukherjee},
+journal={Transactions on Machine Learning Research},
+issn={2835-8856},
+year={2024},
+url={https://openreview.net/forum?id=21kO0u6LN0}
+}
+```
+
 ## 0. Prerequisites
 
 The `config/<pde-name>Config.yaml` file can be used for setting the branch_layers, trunk_layers, loss_type, huber_delta, x0, y0 T_lim, kappa, N_train,P_train, num_fourier_terms, N_test and P_test.
