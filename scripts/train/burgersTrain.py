@@ -45,7 +45,7 @@ if __name__=="__main__":
             keys = random.split(key, N_train)
 
             config.update("jax_enable_x64", True)
-            u_train, y_train_don, s_train_don = vmap(generate_one_training_data, (0, None))(keys, P_train, num_sine_terms, sine_amplitude, Nx , Nt, T_lim, period, kappa, m)
+            u_train, y_train_don, s_train_don = vmap(generate_one_training_data, (0, None, None, None, None, None, None, None, None, None))(keys, P_train, num_sine_terms, sine_amplitude, Nx , Nt, T_lim, period, kappa, m)
 
             # Reshape Data
             u_don_train = np.float32(u_train.reshape(N_train * P_train,-1))
@@ -58,7 +58,7 @@ if __name__=="__main__":
             keys = random.split(key, N_test)
             config.update("jax_enable_x64", False)
 
-            u_test, y_test, s_test = vmap(generate_one_test_data, (0, None))(keys, P_test, num_sine_terms, sine_amplitude, T_lim, period, kappa, m)
+            u_test, y_test, s_test = vmap(generate_one_test_data, (0, None, None, None, None, None, None, None))(keys, P_test, num_sine_terms, sine_amplitude, T_lim, period, kappa, m)
 
             #Reshape Data
             u_test = np.float32(u_test.reshape(N_test * P_test**2,-1))

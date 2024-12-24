@@ -1,4 +1,4 @@
-from jax import random, jit, lax
+from jax import random, jit, lax, vmap
 import jax.numpy as jnp
 
 from functools import partial
@@ -120,6 +120,18 @@ def generate_one_test_data(key, P, num_sine_terms, sine_amplitude, T_lim, period
     u_test = jnp.tile(u, (P**2,1))
     y_test = jnp.hstack([XX.flatten()[:,None], TT.flatten()[:,None]])
     s_test = s.T.flatten()
+
+    return u_test, y_test, s_test
+
+# Geneate test data for plotting
+def generate_test_data_visualization(keys, P_test, N_test, num_sine_terms, sine_amplitude, T_lim, period, kappa, m):
+    
+    u_test, y_test, s_test = vmap(generate_one_test_data, (0, None, None, None, None, None, None, None))(keys, P_test, num_sine_terms, sine_amplitude, T_lim, period, kappa, m)
+
+    #Reshape Data
+    u_test = jnp.float32(u_test.reshape(N_test * P_test**2,-1))
+    y_test = jnp.float32(y_test.reshape(N_test * P_test**2,-1))
+    s_test = jnp.float32(s_test.reshape(N_test * P_test**2,-1))
 
     return u_test, y_test, s_test
 

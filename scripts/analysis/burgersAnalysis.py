@@ -18,6 +18,8 @@ if __name__=="__main__":
     kappa = config_file["global"]["kappa"] # corresponds to T
     period = int(config_file["global"]["period"])
     T_lim = int(config_file["global"]["T_lim"])
+    Nx = int(config_file["global"]["Nx"])
+    Nt = int(config_file["global"]["Nt"])
 
     # Size of rectangle
     x0 = int(config_file["global"]["x0"])
@@ -41,11 +43,29 @@ if __name__=="__main__":
     keys = random.split(key, N_test)
 
     config.update("jax_enable_x64", True)
-    f_test_vis, z_test_vis, u_test_vis = generate_test_data_visualization(key, P_test, x0, y0, T_lim, m, sine_amplitude)
+    u_test_vis, y_test_vis, s_test_vis = generate_test_data_visualization(keys, P_test, x0, y0, T_lim, m, sine_amplitude)
 
     branch_layers = config_file["model"]["branch_layers"]
     trunk_layers =  config_file["model"]["trunk_layers"]
     model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=huber_delta)
+
+    for P_train in P_train_list:
+        for N_train in N_train_list:
+            # Predict
+            model_name = f"model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}_{huber_delta}" if loss_type=="huber" else f"model_N_train_{N_train}_P_train_{P_train}_checkpoint_{loss_type}"
+            params = load_checkpoint(f"./outputs/burgers/saved_models/{model_name}.npz")
+            s_pred = model.predict_u(params, u_test_vis, y_test_vis)
+
+            # Generate an uniform mesh
+            x = jnp.linspace(-period*jnp.pi, period*jnp.pi, Nx)
+            t = jnp.linspace(0, T_lim, Nt)
+            XX, TT = jnp.meshgrid(x, t)
+
+            # Grid data
+            S_pred = griddata(y_test_vis, s_pred.flatten(), (XX,TT), method='cubic')
+            S_test = griddata(y_test_vis, s_test_vis.flatten(), (XX,TT), method='cubic')
+
+            plot_actual_pred(XX, TT, S_test, S_pred, loss_type)
 
     # Plot Rademacher
     file_name = f"gen_bound_{loss_type}_{huber_delta}" if loss_type=="huber" else f"gen_bound_{loss_type}"
