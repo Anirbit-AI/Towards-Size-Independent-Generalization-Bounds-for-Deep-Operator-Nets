@@ -37,15 +37,15 @@ if __name__=="__main__":
     N_train_plot = int(eval(config_file["plot"]["N_train"])) # number of test functions
     P_train_plot = int(eval(config_file["plot"]["P_train"])) # number of test collocation points
 
-    # key = random.PRNGKey(1122) # a new unseen key
-    # keys = random.split(key, N_test)
+    key = random.PRNGKey(1122) # a new unseen key
+    keys = random.split(key, N_test)
 
-    # config.update("jax_enable_x64", True)
-    # f_test_vis, z_test_vis, u_test_vis = generate_test_data_visualization(key, P_test, x0, y0, T_lim, m, sine_amplitude)
+    config.update("jax_enable_x64", True)
+    f_test_vis, z_test_vis, u_test_vis = generate_test_data_visualization(key, P_test, x0, y0, T_lim, m, sine_amplitude)
 
-    # branch_layers = config_file["model"]["branch_layers"]
-    # trunk_layers =  config_file["model"]["trunk_layers"]
-    # model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=huber_delta)
+    branch_layers = config_file["model"]["branch_layers"]
+    trunk_layers =  config_file["model"]["trunk_layers"]
+    model = DeepONet(branch_layers, trunk_layers, loss_type=loss_type, huber_delta=huber_delta)
 
     # Plot Rademacher
     file_name = f"gen_bound_{loss_type}_{huber_delta}" if loss_type=="huber" else f"gen_bound_{loss_type}"

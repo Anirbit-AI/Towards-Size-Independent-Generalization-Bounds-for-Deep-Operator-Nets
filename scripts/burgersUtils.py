@@ -138,7 +138,7 @@ def plot_train_test_error(model, filename):
     axs[2].set_ylabel('Average Fractional Test Loss', fontsize='large')
     axs[2].set_title('Evolution of Average Fractional Test Loss over Iterations', fontsize='large')
 
-    plt.savefig(f"./outputs/heat/train_test/{filename}.png", bbox_inches ="tight")
+    plt.savefig(f"./outputs/burgers/train_test/{filename}.png", bbox_inches ="tight")
 
     return
 
@@ -180,10 +180,10 @@ def plot_rademacher(gen_error_list, bound_list, size_list, file_name):
     ax.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
     ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
 
-    plt.savefig(f"./outputs/heat/{file_name}.svg")
-    plt.savefig(f"./outputs/heat/{file_name}.png", bbox_inches ="tight")
+    plt.savefig(f"./outputs/burgers/{file_name}.svg")
+    plt.savefig(f"./outputs/burgers/{file_name}.png", bbox_inches ="tight")
 
-def plot_actual_pred(XX, TT, S_test, S_pred):
+def plot_actual_pred(XX, TT, S_test, S_pred, loss_type):
     # Create a new figure with two rows of subplots
     fig, axs = plt.subplots(2, 2, figsize=(14, 11))
 
@@ -215,4 +215,4 @@ def plot_actual_pred(XX, TT, S_test, S_pred):
     axs[1, 1].set_title("Predicted Solution using DeepONet", fontsize=16)
     axs[1, 1].tick_params(axis='both', which='major', labelsize=12)
 
-    plt.savefig(f"./outputs/heat/plot_actual_pred.png", bbox_inches ="tight")
+    plt.savefig(f"./outputs/burgers/actual_predict/actual_predicted_plots_burgers_loss_type_{loss_type}.png", bbox_inches ="tight")
