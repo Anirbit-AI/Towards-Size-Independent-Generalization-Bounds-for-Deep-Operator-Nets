@@ -16,9 +16,6 @@ url={https://openreview.net/forum?id=21kO0u6LN0}
 
 ## 0. Prerequisites
 
-The `config/<pde-name>Config.yaml` file can be used for setting the branch_layers, trunk_layers, loss_type, huber_delta, x0, y0 T_lim, kappa, N_train,P_train, num_fourier_terms, N_test and P_test.
-
-
 ### 0.1. Local 
 To install the required libraries run `pip install -r requirements.txt` and then follow the instructions in Training and Analysis section below.
 
@@ -38,13 +35,16 @@ If docker is already set up then you can follow these steps to set up your envir
 
 Note : Please refer to docker documentation linked above for more information about what each of these commands.
 
+## 1. Setting the Config Files
 
-## 1. Training
+The `config/<pde-name>Config.yaml` file can be used for setting the branch_layers, trunk_layers, loss_type, huber_delta, x0, y0 T_lim, kappa, N_train,P_train, num_fourier_terms, N_test and P_test.
+
+## 2. Training
 
 The `scripts\train\<pde-name>Train.py` contains the scripts for training the models
 
 Note : The bias in the DeepONet needs to be disabled before calculating the Rademacher bound
 
-## 2. Analysis
+## 3. Analysis
 
 The `scripts\analysis\<pde-name>Analysis.py` contains the scripts for analyzing the models
