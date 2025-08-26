@@ -2,14 +2,17 @@ import jax.numpy as jnp
 from jax import random, vmap
 from jax import config
 import json
+import sys
 
-from data.burgersDataGeneration import *
+sys.path.append("./")
+
+from scripts.data.burgersDataGeneration import *
 from models.DeepONet import *
 from scripts.burgersUtils import *
 
 
 if __name__=="__main__":
-    config_file = load_yaml_config('./config/heatConfig.yaml')
+    config_file = load_yaml_config('./config/burgersConfig.yaml')
 
     # Define hyperparameters and grid:
     loss_type = config_file["model"]["loss_type"]
@@ -48,9 +51,9 @@ if __name__=="__main__":
             u_train, y_train_don, s_train_don = vmap(generate_one_training_data, (0, None, None, None, None, None, None, None, None, None))(keys, P_train, num_sine_terms, sine_amplitude, Nx , Nt, T_lim, period, kappa, m)
 
             # Reshape Data
-            u_don_train = np.float32(u_train.reshape(N_train * P_train,-1))
-            y_don_train = np.float32(y_train_don.reshape(N_train * P_train,-1))
-            s_don_train = np.float32(s_train_don.reshape(N_train * P_train,-1))
+            u_don_train = jnp.float32(u_train.reshape(N_train * P_train,-1))
+            y_don_train = jnp.float32(y_train_don.reshape(N_train * P_train,-1))
+            s_don_train = jnp.float32(s_train_don.reshape(N_train * P_train,-1))
             config.update("jax_enable_x64", False)
 
             # Test
@@ -61,9 +64,9 @@ if __name__=="__main__":
             u_test, y_test, s_test = vmap(generate_one_test_data, (0, None, None, None, None, None, None, None))(keys, P_test, num_sine_terms, sine_amplitude, T_lim, period, kappa, m)
 
             #Reshape Data
-            u_test = np.float32(u_test.reshape(N_test * P_test**2,-1))
-            y_test = np.float32(y_test.reshape(N_test * P_test**2,-1))
-            s_test = np.float32(s_test.reshape(N_test * P_test**2,-1))
+            u_test = jnp.float32(u_test.reshape(N_test * P_test**2,-1))
+            y_test = jnp.float32(y_test.reshape(N_test * P_test**2,-1))
+            s_test = jnp.float32(s_test.reshape(N_test * P_test**2,-1))
 
             config.update("jax_enable_x64", False)
 
